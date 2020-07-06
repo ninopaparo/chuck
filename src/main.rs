@@ -2,13 +2,22 @@ extern crate reqwest;
 extern crate serde;
 use ::chuck::chuck;
 type CustomResult = Result<(), Box<dyn std::error::Error>>;
+use clap::{load_yaml, App};
+
 #[tokio::main]
 async fn main() -> CustomResult {
-    let r = chuck::Client::new().get_random_joke().await?;
-    println!("{}", r);
-    let r2 = chuck::Client::new()
-        .get_fact_by_category(chuck::Category::Food)
-        .await?;
-    println!("{}", r2);
+    let yaml = load_yaml!("args.yml");
+    let matches = App::from(yaml).get_matches();
+
+    let category = matches.value_of("category").unwrap_or("none");
+
+    if category == "none" {
+        let r = chuck::Client::new().get_random_joke().await?;
+        println!("{}", r);
+    } else {
+        let r = chuck::Client::new().get_fact_by_category(category).await?;
+        println!("{}", r);
+    }
+
     Ok(())
 }

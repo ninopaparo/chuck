@@ -1,0 +1,28 @@
+name: "Atlas CLI"
+version: "0.1.0"
+author: Nino Paparo
+about: Check Norris coolness
+args:
+  - category:
+      help: Which category
+      required: false
+      takes_value: true
+      possible_values:
+        [
+          Animal,
+          Career,
+          Celebrity,
+          Dev,
+          Explicit,
+          Fashion,
+          Food,
+          History,
+          Money,
+          Movie,
+          Music,
+          Political,
+          Religion,
+          Science,
+          Sport,
+          Travel,
+        ]
