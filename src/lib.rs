@@ -25,18 +25,7 @@ pub mod chuck {
                 cli: reqwest::Client::new(),
             }
         }
-        pub async fn get_random_joke(&self) -> Result<String, reqwest::Error> {
-            let url = format!("{}{}", BASE_URL, RANDOM_URL);
-            Ok(self
-                .cli
-                .get(&url)
-                .send()
-                .await?
-                .json::<self::Response>()
-                .await?
-                .value)
-        }
-        pub async fn get_fact_by_category(&self, c: &str) -> Result<String, reqwest::Error> {
+        pub async fn get_chuck_facts(&self, c: &str) -> Result<String, reqwest::Error> {
             let category: String = match c {
                 "Animal" => String::from("animal"),
                 "Dev" => String::from("dev"),
@@ -56,7 +45,15 @@ pub mod chuck {
                 "Travel" => String::from("travel"),
                 _ => String::from("none"),
             };
-            let url = format!("{}{}?category={}", BASE_URL, RANDOM_URL, category);
+
+            let url: String;
+
+            if category == "none" {
+                url = format!("{}{}", BASE_URL, RANDOM_URL);
+            } else {
+                url = format!("{}{}?category={}", BASE_URL, RANDOM_URL, category);
+            }
+
             let res = self
                 .cli
                 .get(&url)

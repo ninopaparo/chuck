@@ -11,13 +11,8 @@ async fn main() -> CustomResult {
 
     let category = matches.value_of("category").unwrap_or("none");
 
-    if category == "none" {
-        let r = chuck::Client::new().get_random_joke().await?;
-        println!("{}", r);
-    } else {
-        let r = chuck::Client::new().get_fact_by_category(category).await?;
-        println!("{}", r);
-    }
+    let r = chuck::Client::new().get_chuck_facts(category).await?;
+    println!("{}", r);
 
     Ok(())
 }
