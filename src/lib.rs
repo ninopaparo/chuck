@@ -48,10 +48,10 @@ pub mod chuck {
 
             let url: String;
 
-            if category == "none" {
-                url = format!("{}{}", BASE_URL, RANDOM_URL);
+            if category != "none" {
+                url = format!("{}{}?category={}", &self.url, RANDOM_URL, category);
             } else {
-                url = format!("{}{}?category={}", BASE_URL, RANDOM_URL, category);
+                url = format!("{}{}", &self.url, RANDOM_URL);
             }
 
             let res = self
@@ -63,5 +63,53 @@ pub mod chuck {
                 .await?;
             Ok(res.value)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::chuck;
+    use wiremock::matchers::{method, PathExactMatcher};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    #[tokio::test]
+    async fn client_url_test() {
+        let client = chuck::Client::new();
+        assert_eq!("https://api.chucknorris.io/jokes", client.url);
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn check_category_test() {
+        let category = "Movie";
+        // Act
+        let mock_server = MockServer::start().await;
+        let json_data = json::parse(r#"
+        {
+            "icon_url" : "https://assets.chucknorris.host/img/avatar/chuck-norris.png",
+            "id" : "D8o00FE0RNSNUlltwEPDVg",
+            "url" : "",
+            "value" : "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move."
+        }"#).unwrap();
+        let response = ResponseTemplate::new(200).set_body_json(json_data.dump());
+        let mock = Mock::given(method("GET"))
+            .and(PathExactMatcher::new(format!(
+                "{}{}?category={}",
+                &mock_server.uri(),
+                "/random",
+                category
+            )))
+            .respond_with(response);
+        mock_server.register(mock).await;
+        // Act
+        let client = chuck::Client {
+            url: &mock_server.uri(),
+            cli: reqwest::Client::new(),
+        };
+
+        let r = client.get_chuck_facts(category).await.unwrap();
+        // Assert
+        let expected_value = "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move.";
+        assert_eq!(r, expected_value);
     }
 }

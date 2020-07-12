@@ -11,8 +11,7 @@ async fn main() -> CustomResult {
 
     let category = matches.value_of("category").unwrap_or("none");
 
-    let r = chuck::Client::new().get_chuck_facts(category).await?;
-    println!("{}", r);
+    println!("{}", chuck::Client::new().get_chuck_facts(category).await?);
 
     Ok(())
 }
