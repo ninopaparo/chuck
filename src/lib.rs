@@ -69,7 +69,7 @@ pub mod chuck {
 #[cfg(test)]
 mod tests {
     use crate::chuck;
-    use wiremock::matchers::{method, PathExactMatcher};
+    use wiremock::matchers::{method, path, query_param};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
     #[tokio::test]
@@ -79,37 +79,65 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore]
-    async fn check_category_test() {
-        let category = "Movie";
-        // Act
+    async fn get_facts_no_category() {
         let mock_server = MockServer::start().await;
-        let json_data = json::parse(r#"
+
+        let payload = r#"
         {
             "icon_url" : "https://assets.chucknorris.host/img/avatar/chuck-norris.png",
-            "id" : "D8o00FE0RNSNUlltwEPDVg",
+            "id" : "1111",
             "url" : "",
             "value" : "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move."
-        }"#).unwrap();
-        let response = ResponseTemplate::new(200).set_body_json(json_data.dump());
+        }"#
+        .as_bytes()
+        .to_owned();
+        let response = ResponseTemplate::new(200).set_body_raw(payload, "application/json");
         let mock = Mock::given(method("GET"))
-            .and(PathExactMatcher::new(format!(
-                "{}{}?category={}",
-                &mock_server.uri(),
-                "/random",
-                category
-            )))
+            .and(path("random"))
             .respond_with(response);
         mock_server.register(mock).await;
-        // Act
+
         let client = chuck::Client {
             url: &mock_server.uri(),
             cli: reqwest::Client::new(),
         };
+        let value = client.get_chuck_facts("non existent field").await.unwrap();
 
-        let r = client.get_chuck_facts(category).await.unwrap();
-        // Assert
-        let expected_value = "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move.";
-        assert_eq!(r, expected_value);
+        let expected_value = String::from(
+            "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move.",
+        );
+        assert_eq!(value, expected_value);
+    }
+    #[tokio::test]
+    async fn get_facts_category() {
+        let category = "Movie";
+        let mock_server = MockServer::start().await;
+
+        let payload: Vec<u8> = r#"
+        {
+            "icon_url" : "https://assets.chucknorris.host/img/avatar/chuck-norris.png",
+            "id" : "1111",
+            "url" : "",
+            "value" : "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move."
+        }"#
+        .as_bytes()
+        .to_owned();
+        let response = ResponseTemplate::new(200).set_body_raw(payload, "application/json");
+        let mock = Mock::given(method("GET"))
+            .and(path("random"))
+            .and(query_param("category", category.to_ascii_lowercase()))
+            .respond_with(response);
+        mock_server.register(mock).await;
+
+        let client = chuck::Client {
+            url: &mock_server.uri(),
+            cli: reqwest::Client::new(),
+        };
+        let value = client.get_chuck_facts(category).await.unwrap();
+
+        let expected_value = String::from(
+            "Chuck Norris has a Grizzly Bear rug laid out on his family room floor. The Grizzly Bear isn't dead...it's just too afraid to move.",
+        );
+        assert_eq!(value, expected_value);
     }
 }
