@@ -5,6 +5,34 @@
 Simple command line tool to get jokes from [chucknorris.io](https://api.chucknorris.io/)
 
 
-## Usage
+## Build
 
-run `cargo run --release`
+Run `cargo run --release`
+
+##  Usage
+
+To get a random joke from a specific category run:
+
+`chuck` **category**
+
+Where the available joke categories are:
+
+  * Career
+  * Celebrity
+  * Dev
+  * Explicit
+  * Fashion
+  * Food
+  * History
+  * Money
+  * Movie
+  * Music
+  * Political
+  * Religion
+  * Science
+  * Sport
+  * Travel
+
+To get a random joke simply run:
+
+`chuck`
