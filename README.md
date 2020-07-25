@@ -33,6 +33,3 @@ Where the available joke categories are:
   * Sport
   * Travel
 
-To get a random joke simply run:
-
-`chuck`
