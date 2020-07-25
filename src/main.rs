@@ -1,8 +1,4 @@
-extern crate dialoguer;
-extern crate reqwest;
-extern crate serde;
-
-use ::chuck::chuck;
+use chuck::chuck;
 use dialoguer::Confirm;
 
 mod utils;
@@ -17,13 +13,11 @@ async fn main() -> CustomResult {
             "{}\n",
             chuck::Client::new().get_chuck_facts(&category).await?
         );
-        if Confirm::new()
+        if !Confirm::new()
             .with_prompt("Do you want to read a new fact?")
             .interact()
             .unwrap()
         {
-            continue;
-        } else {
             break;
         }
     }
