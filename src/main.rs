@@ -21,5 +21,6 @@ async fn main() -> CustomResult {
             break;
         }
     }
+    color_eyre::install()?;
     Ok(())
 }
