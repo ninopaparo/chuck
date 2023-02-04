@@ -1,8 +1,9 @@
 extern crate reqwest;
 extern crate serde;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-const BASE_URL: &'static str = "https://api.chucknorris.io/jokes";
-const RANDOM_URL: &'static str = "/random";
+const BASE_URL: &str = "https://api.chucknorris.io/jokes";
+const RANDOM_URL: &str = "/random";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
@@ -17,14 +18,20 @@ pub struct Client<'a> {
     pub cli: reqwest::Client,
 }
 
+impl<'a> Default for Client<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> Client<'a> {
     pub fn new() -> Self {
         Client {
-            url: &BASE_URL,
+            url: BASE_URL,
             cli: reqwest::Client::new(),
         }
     }
-    pub async fn get_chuck_facts(&self, c: &str) -> Result<String, reqwest::Error> {
+    pub async fn get_chuck_facts(&self, c: &str) -> Result<String> {
         let category: String = match c {
             "Animal" => String::from("animal"),
             "Dev" => String::from("dev"),
@@ -42,13 +49,11 @@ impl<'a> Client<'a> {
             _ => String::from("none"),
         };
 
-        let url: String;
-
-        if category != "none" {
-            url = format!("{}{}?category={}", &self.url, RANDOM_URL, category);
+        let url: String = if category != "none" {
+            format!("{}{}?category={}", &self.url, RANDOM_URL, category)
         } else {
-            url = format!("{}{}", &self.url, RANDOM_URL);
-        }
+            format!("{}{}", &self.url, RANDOM_URL)
+        };
 
         let res = self
             .cli

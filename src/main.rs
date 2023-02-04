@@ -1,14 +1,13 @@
+use anyhow::Result;
 use chuck::chuck;
 use dialoguer::Confirm;
-
 mod utils;
-type CustomResult = Result<(), Box<dyn std::error::Error>>;
 
 #[tokio::main]
-async fn main() -> CustomResult {
-    utils::utils::show_info();
+async fn main() -> Result<()> {
+    utils::show_info();
     loop {
-        let category = utils::utils::choose_category();
+        let category = utils::choose_category();
         println!(
             "{}\n",
             chuck::Client::new().get_chuck_facts(&category).await?
@@ -18,9 +17,9 @@ async fn main() -> CustomResult {
             .interact()
             .unwrap()
         {
+            println!("Bye!");
             break;
         }
     }
-    color_eyre::install()?;
     Ok(())
 }
