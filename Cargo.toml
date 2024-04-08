@@ -5,7 +5,7 @@ authors = ["Nino Paparo"]
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.11.20", features = ["json"] }
+reqwest = { version = "0.12.3", features = ["json"] }
 tokio = { version = "1.32.0", features = ["full"] }
 serde = { version = "1.0.188", features = ["derive"] }
 wiremock = "0.5.19"
